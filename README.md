@@ -1,4 +1,4 @@
-Nonlinear_Dynamics
+Elmer_Nonlinear_Dynamics
 
 Author: Sayandip Ganguly* (sayandipganguly@gmail.com) & Koushik Roy (koushik@iitp.ac.in)
 
