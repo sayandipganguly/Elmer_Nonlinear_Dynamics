@@ -2,9 +2,10 @@
 clc;clear all;clc;
 %define paths
 %===================================================================================================================================================================================
- elmer_path = 'C:\Program Files\Elmer 9.0-Release\bin';
- paraview_path = 'C:\Program Files\ParaView 5.9.0-RC3-Windows-Python3.8-msvc2017-64bit\bin\paraview.exe';
- project_path = 'D:\Elmer_Axial bar\New folder';
+ INPUT_ELMERPATH="PROVIDE THE PATH OF ELMER:"; %example of input-'C:\Program Files\Elmer 9.0-Release\bin'
+ elmer_path = input(INPUT_ELMERPATH);
+ INPUT_PROJECTPATH="PROVIDE THE PATH WHERE GEOMETRIC MODEL IS SAVED:"; %example of input-'D:\Elmer_Axial bar\New folder'
+ project_path = input(INPUT_PROJECTPATH);
 
 %create string for line seperator===========================================================================================================================================================================
     lb = sprintf('\n');
