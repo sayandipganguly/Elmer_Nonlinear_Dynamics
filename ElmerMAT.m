@@ -267,63 +267,47 @@ copyfile(source4,destination4)
         A(i,1)=(D(i+1,1)-(2*D(i,1))+D(i-1,1))/(0.005)^2; % 2nd order differentiation
     end
 %%%****************************Develop Poincare' Map**********************************************************************    
-lcv=3; % Provide least count of approximation for velocity; should be fixed based on the intended accuracy
-lcd=4; % Provide least count of approximation for displacement;should be fixed based on the intended accuracy
-t=(0:dt:(l-1)*dt)'; % Time e.g. 0:0.005:20
-Acc=0.25*max(A(150:length(A),1)); % Point from acceleration time-history which will be checked for repetition of specified node of the member in order to evaluate period of motion
-L2=length(A);
-point=Acc*ones(L2,1)';
-point=point';
-[t01,A01] = intersections(t,A,t,point,1); % Returns intersection points x02=Time, y02=intended displacement where intersection is required
-figure(1)
-plot(t,A,t,point,t01,A01,'ok');
-L12=length(t01);
-k1=1;
-k2=1;
-for i2=1:((L12-1)/2)
-    Pvel1(i2)=round(interp1(t,V,t01(k1)),lcv); % Returns velocity at intersection times
-    k1=k1+2;
-end
-for j2=1:((L12-1)/2)
-    Pdis1(j2)=round(interp1(t,D,t01(k2)),lcd); % Returns Dsiplacement at intersection times
-    k2=k2+2;
-end
-figure(1) 
-plot(Pdis1,Pvel1,'r.') %Poincare map
-figure(2)
-plot(t,A,t,point,t01,A01,'ok');
+Tspan=2.5; % Total time of analysis
+t=(dt:0.005:Tspan)';
+%lcv=3; % Provide least count of approximation for velocity; should be fixed based on the intended accuracy
+multi_lcd=1e3; % multiplier to get integer number
+lcd=1; % Provide least count of approximation for displacement;should be fixed based on the intended accuracy
+st=1; %Provide assumed time for the initiation of stead-state
+Et1=st/dt; %initiation point of steady-state
+    pDisp=D(Et1:l,1); % 5001 
+    pVel=V(Et1:l,1);
+    pt=t(Et1:l,1);
+    pn=zeros(size(pt,1),2);
+    figure()
+    set(gca,'fontWeight','bold','linewidth',1.5)
+    grid on
+    hold on
+    itr = 1;
 
-Pdis21=Pdis1;
-Pvel21=Pvel1;
-Pdis2=zeros(length(t),1);
-Pvel2=zeros(length(t),1);
-k=1;
-j=1;
-for it=1:length(t)
-    if t(it)<t01(k)
-        if it==1
-        Pdis2(it)=Pdis21(1);
-        Pvel2(it)=Pvel21(1);
-        else
-        Pdis2(it)=Pdis21(j);
-        Pvel2(it)=Pvel21(j);
+for j = round(length(pDisp(:,1))/2):length(pDisp(:,1))-1;
+if(pDisp(j,1)>=pDisp((j-1),1))&&(pDisp(j,1)>=pDisp((j+1),1))
+             pn(itr,1)=pDisp(j,1);
+             pn(itr,2)=pVel(j,1);
+             itr =itr+1;
+            hold on;
         end
-        if j<length(Pdis1)
-        k=k+2;
-        j=j+1;
-        end
-        else
-        Pdis2(it)=Pdis1(1,length(Pdis1));
-        Pvel2(it)=Pvel1(1,length(Pdis1));   
-    end
-end   
+   end
+    dis = pn(:,1).*multi_lcd;
+    pn(:,1)=round(dis,lcd);
+    [~,point] = unique(pn(:,1),'stable');
+    poincare = pn(point,:);
+    poincare( ~any(poincare,2), : ) = [];  
+    poincare( :, ~any(poincare,1) ) = [];
+    scatter(poincare(:,1).*1e-3,poincare(:,2),'xb','linewidth',1.1);
+        hold off
+    figure(3)
+    plot(pDisp(:,1),pVel(:,1))
+  
 
 %%%%%%% Section to generate Poincare' map. More than one-points in th ePoincare' map either difines the presence of either transient part in the
 %motion or sub or superharmonic frequency indicating a nonlinear system %%%%
 
-st=0.75; %Provide assumed time for the initiation of stead-state
-j=st/dt;
-  for i=j:length(t)
+  for i=Et1:length(t)
     subplot(2,3,1) 
     plot(t(i,1),D(i,1),'o','linewidth',2)
     xlabel('Time')
@@ -369,23 +353,21 @@ j=st/dt;
     title('Phase-Space Diagram-2D')  
 
     subplot(2,3,5)
-    plot3(t(i),Pdis2(i),Pvel2(i),'o','linewidth',2) %Poincare map
+    plot3(t(i),D(i),V(i),'o','linewidth',2) %Poincare map
     xlabel('Time')
     ylabel('Displacement')
     zlabel('Velocity')
     hold on
     subplot(2,3,5) 
-    plot3(t(j:i),D(j:i),V(j:i),'Color','k','linewidth',2)
+    plot3(t,D,V,'Color','k','linewidth',2)
     xlabel('Time')
     ylabel('Displacement')
     zlabel('Velocity')
     title('3D-Phase-Space Diagram and Poincare section') 
     
     subplot(2,3,6) 
-    plot(Pdis2(i),Pvel2(i),'ro','linewidth',2) %Poincare map
+    plot(poincare(:,1),poincare(:,2),'ro','linewidth',2) %Poincare map
     hold on
-    subplot(2,3,6) 
-    plot(Pdis2(j:i),Pvel2(j:i),'k*')
     xlabel('Displacement')
     ylabel('Velocity')
     title('Poincare map') 
